@@ -14,7 +14,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: 'http://localhost:3000' ,
+  origin: 'https://capstone-emsfrotend.vercel.app' ,
   credentials: true,
 };
 

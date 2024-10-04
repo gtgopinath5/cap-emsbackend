@@ -2,72 +2,78 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 
+
 // Signup user
 const signupUser = async (req, res) => {
-    try {
-      const { name, email, username, password } = req.body; // Ensure email is included
-      const user = await User.findOne({ $or: [{ email }, { username }] });
-  
-      if (user) {
-        return res.status(400).json({ error: "User already exists" });
-      }
-  
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-  
-      const newUser = new User({
-        name,
-        email, // Ensure email is included
-        username,
-        password: hashedPassword,
-      });
-      await newUser.save();
-  
-      if (newUser) {
-        generateTokenAndSetCookie(newUser._id, res);
-        res.status(201).json({
+  try {
+    const { name, email, username, password } = req.body;
+
+    const user = await User.findOne({ $or: [{ email }, { username }] });
+    if (user) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name,
+      email,
+      username,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    if (newUser) {
+      const token = generateTokenAndSetCookie(newUser._id); // Generate token
+      res.status(201).json({
+        message: 'Signup successful',
+        token, // Return the token here
+        user: {
           _id: newUser._id,
           name: newUser.name,
           email: newUser.email,
           username: newUser.username,
-        });
-      } else {
-        res.status(400).json({ error: "Invalid user data" });
-      }
-    } catch (err) {
-      res.status(500).json({ error: "An error occurred during signup" });
-      console.log("Error in signupUser:", err.message);
+        }
+      });
+    } else {
+      res.status(400).json({ error: "Invalid user data" });
     }
-  };
-  
-  
+  } catch (err) {
+    res.status(500).json({ error: "An error occurred during signup" });
+    console.log("Error in signupUser:", err.message);
+  }
+};
+
 // Login user
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user?.password || ""
-    );
+    const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
     if (!user || !isPasswordCorrect) {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    generateTokenAndSetCookie(user._id, res);
-
+    const token = generateTokenAndSetCookie(user._id); // Generate token
     res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      username: user.username,
+      message: 'Login successful',
+      token, // Return the token here
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+      }
     });
   } catch (error) {
     res.status(500).json({ error: "An error occurred during login" });
     console.log("Error in loginUser: ", error.message);
   }
 };
+
 // Logout user
 const logoutUser = (req, res) => {
     try {

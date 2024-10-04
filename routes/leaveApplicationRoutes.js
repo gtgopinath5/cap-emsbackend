@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/', protectRoute, createLeaveApplication);
 
 // Route to get all leave applications (admin only)
-router.get('/', protectRoute, adminRoute, getAllLeaveApplications);
+router.get('/', protectRoute, getAllLeaveApplications);
 
 // Route to get leave applications for logged-in user
 router.get('/user', protectRoute, getUserLeaveApplications);

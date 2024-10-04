@@ -23,6 +23,6 @@ router.put("/:id", protectRoute, adminRoute, updateAttendanceById);
 router.delete("/:id", protectRoute, adminRoute, deleteAttendanceById);
 
 // Get all attendance records (admin route)
-router.get("/all", protectRoute, adminRoute, getAllAttendance);
+router.get("/all", protectRoute, getAllAttendance);
 
 export default router;
